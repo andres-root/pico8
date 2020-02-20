@@ -5,15 +5,19 @@ __lua__
 
 local entity
 local coin_entity
+local score
 
 function _init()
+    score = 0
     entity = {
         x = 64,
         y = 64,
         width = 8,
         height = 8,
         move_speed = 2,
-        update=function(self)
+        is_horizontally_aligned = false,
+        is_vertically_aligned = false,
+        update = function(self)
             if btn(0) then
                 self.x -= 1
             end
@@ -34,31 +38,85 @@ function _init()
                 sfx(0)
             end
         end,
-        draw=function(self)
+        draw = function(self)
             spr(1, self.x, self.y)
-            rect(self.x, self.y, self.x + self.width, self.y + self.height, 7)
+            -- rect(self.x, self.y, self.x + self.width, self.y + self.height, 7)
+            -- print(self.is_vertically_aligned and self.is_horizontally_aligned, self.x + 10, self.y + 7)
+        end,
+        check_collision = function(self, coin)
+            -- Check alignment with coin
+            local left = self.x
+            local right = self.x + self.width
+            local top = self.y
+            local bottom = self.y + self.height
+
+            if left < coin.x and coin.x < right then
+                self.is_vertically_aligned = true
+            else
+                self.is_vertically_aligned = false
+            end
+
+            if top < coin.y and coin.y < bottom then
+                self.is_horizontally_aligned = true
+            else
+                self.is_horizontally_aligned = false
+            end
+
+            -- Collect the coin
+            if self.is_horizontally_aligned and self.is_vertically_aligned and not coin.is_collected then
+                coin.is_collected = true
+                score += 1
+            end
         end
     }
 
-    coin_entity = {
-        x = 20,
-        y= 20,
-        draw=function(self)
-            spr(2, self.x, self.y)
-            pset(self.x, self.y, 7)
-        end,
+    coins = {
+        make_coin(25, 30),
+        make_coin(40, 20),
+        make_coin(30, 60),
+        make_coin(70, 80),
+        make_coin(90, 50),
+        make_coin(20, 40)
     }
 end
 
 function _update()
     entity:update()
+
+    local coin
+    for coin in all(coins) do
+        coin:update()
+        entity:check_collision(coin)
+    end
 end
 
 function _draw()
     cls()
-    -- pal(15, 4)
+    print(score, 5, 5, 7)
     entity:draw()
-    coin_entity:draw()
+    
+    local coin
+    for coin in all(coins) do
+        coin:draw()
+    end
+end
+
+function make_coin(x, y)
+    coin_entity = {
+        x = x,
+        y = y,
+        is_collected = false,
+        update = function(self)
+        end,
+        draw = function(self)
+            if not self.is_collected then
+                spr(2, self.x - 3, self.y - 4)
+                -- pset(self.x, self.y, 7)
+            end
+        end,
+    }
+
+    return coin_entity
 end
 
 __gfx__
