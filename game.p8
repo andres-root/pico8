@@ -40,7 +40,7 @@ function _init()
         end,
         draw = function(self)
             spr(1, self.x, self.y)
-            -- rect(self.x, self.y, self.x + self.width, self.y + self.height, 7)
+            rect(self.x, self.y, self.x + self.width, self.y + self.height, 7)
             -- print(self.is_vertically_aligned and self.is_horizontally_aligned, self.x + 10, self.y + 7)
         end,
         check_collision = function(self, coin)
@@ -50,20 +50,8 @@ function _init()
             local top = self.y
             local bottom = self.y + self.height
 
-            if left < coin.x and coin.x < right then
-                self.is_vertically_aligned = true
-            else
-                self.is_vertically_aligned = false
-            end
-
-            if top < coin.y and coin.y < bottom then
-                self.is_horizontally_aligned = true
-            else
-                self.is_horizontally_aligned = false
-            end
-
             -- Collect the coin
-            if self.is_horizontally_aligned and self.is_vertically_aligned and not coin.is_collected then
+            if is_point_in_rect(coin.x, coin.y, left, right, top, bottom) and not coin.is_collected then
                 coin.is_collected = true
                 score += 1
             end
@@ -105,18 +93,27 @@ function make_coin(x, y)
     coin_entity = {
         x = x,
         y = y,
+        width = 6,
+        height = 7,
         is_collected = false,
         update = function(self)
         end,
         draw = function(self)
             if not self.is_collected then
-                spr(2, self.x - 3, self.y - 4)
-                -- pset(self.x, self.y, 7)
+                spr(2, self.x, self.y)
+                rect(self.x, self.y, self.x + self.width, self.y + self.height, 12)
             end
         end,
     }
 
     return coin_entity
+end
+
+function is_point_in_rect(x, y, left, right, top, bottom)
+    local is_horizontally_aligned = (top < y and y < bottom)
+    local is_vertically_aligned = (left < x and x < right)
+
+    return (is_horizontally_aligned and is_vertically_aligned)
 end
 
 __gfx__
