@@ -40,18 +40,23 @@ function _init()
         end,
         draw = function(self)
             spr(1, self.x, self.y)
-            rect(self.x, self.y, self.x + self.width, self.y + self.height, 7)
+            -- rect(self.x, self.y, self.x + self.width, self.y + self.height, 7)
             -- print(self.is_vertically_aligned and self.is_horizontally_aligned, self.x + 10, self.y + 7)
         end,
         check_collision = function(self, coin)
             -- Check alignment with coin
-            local left = self.x
-            local right = self.x + self.width
-            local top = self.y
-            local bottom = self.y + self.height
+            local entity_left = self.x
+            local entity_right = self.x + self.width
+            local entity_top = self.y
+            local entity_bottom = self.y + self.height
+
+            local coin_left = coin.x
+            local coin_right = coin.x + coin.width
+            local coin_top = coin.y
+            local coin_bottom = coin.y + coin.height
 
             -- Collect the coin
-            if is_point_in_rect(coin.x, coin.y, left, right, top, bottom) and not coin.is_collected then
+            if not coin.is_collected and rects_overlapping(entity_left, entity_top, entity_right, entity_bottom, coin_left, coin_top, coin_right, coin_bottom) then
                 coin.is_collected = true
                 score += 1
             end
@@ -72,6 +77,7 @@ function _update()
     entity:update()
 
     local coin
+
     for coin in all(coins) do
         coin:update()
         entity:check_collision(coin)
@@ -84,6 +90,7 @@ function _draw()
     entity:draw()
     
     local coin
+    
     for coin in all(coins) do
         coin:draw()
     end
@@ -101,7 +108,7 @@ function make_coin(x, y)
         draw = function(self)
             if not self.is_collected then
                 spr(2, self.x, self.y)
-                rect(self.x, self.y, self.x + self.width, self.y + self.height, 12)
+                -- rect(self.x, self.y, self.x + self.width, self.y + self.height, 12)
             end
         end,
     }
@@ -114,6 +121,14 @@ function is_point_in_rect(x, y, left, right, top, bottom)
     local is_vertically_aligned = (left < x and x < right)
 
     return (is_horizontally_aligned and is_vertically_aligned)
+end
+
+function lines_overlapping(min1, max1, min2, max2)
+    return (max1 > min2 and max2 > min1)
+end
+
+function rects_overlapping(left1, top1, right1, bottom1, left2, top2, right2, bottom2)
+    return (lines_overlapping(left1, right1, left2, right2) and lines_overlapping(top1, bottom1, top2, bottom2))
 end
 
 __gfx__
