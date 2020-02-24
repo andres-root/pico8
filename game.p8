@@ -137,11 +137,12 @@ function rects_overlapping(left1, top1, right1, bottom1, left2, top2, right2, bo
 end
 
 function circles_overlapping(x1, y1, r1, x2, y2, r2)
-    local dx = x2 - x1
-    local dy = y2 - y1
-    local dist = sqrt((dx * dx) + (dy * dy))
+    local dx = mid(-100, (x2 - x1), 100)
+    local dy = mid(-100, (y2 - y1), 100)
 
-    return dist < (r1 + r2)
+    return (dx * dx) + (dy * dy) < (r1 + r2) * (r1 + r2)
+    -- local dist = sqrt((dx * dx) + (dy * dy))
+    -- return dist < (r1 + r2)
 end
 
 __gfx__
