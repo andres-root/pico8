@@ -14,6 +14,7 @@ function _init()
         y = 64,
         width = 8,
         height = 8,
+        radius = 4,
         move_speed = 2,
         is_horizontally_aligned = false,
         is_vertically_aligned = false,
@@ -39,7 +40,8 @@ function _init()
             end
         end,
         draw = function(self)
-            spr(1, self.x, self.y)
+            spr(1, self.x - 4, self.y - 4)
+            circ(self.x, self.y, self.radius, 7)
             -- rect(self.x, self.y, self.x + self.width, self.y + self.height, 7)
             -- print(self.is_vertically_aligned and self.is_horizontally_aligned, self.x + 10, self.y + 7)
         end,
@@ -56,7 +58,8 @@ function _init()
             local coin_bottom = coin.y + coin.height
 
             -- Collect the coin
-            if not coin.is_collected and rects_overlapping(entity_left, entity_top, entity_right, entity_bottom, coin_left, coin_top, coin_right, coin_bottom) then
+            -- if not coin.is_collected and rects_overlapping(entity_left, entity_top, entity_right, entity_bottom, coin_left, coin_top, coin_right, coin_bottom) then
+            if not coin.is_collected and circles_overlapping(self.x, self.y, self.radius, coin.x, coin.y, coin.radius) then
                 coin.is_collected = true
                 score += 1
             end
@@ -102,13 +105,15 @@ function make_coin(x, y)
         y = y,
         width = 6,
         height = 7,
+        radius = 3,
         is_collected = false,
         update = function(self)
         end,
         draw = function(self)
             if not self.is_collected then
-                spr(2, self.x, self.y)
-                -- rect(self.x, self.y, self.x + self.width, self.y + self.height, 12)
+                spr(2, self.x - 3, self.y - 3)
+                circ(self.x, self.y, self.radius, 12)
+            -- rect(self.x, self.y, self.x + self.width, self.y + self.height, 12)
             end
         end,
     }
@@ -129,6 +134,14 @@ end
 
 function rects_overlapping(left1, top1, right1, bottom1, left2, top2, right2, bottom2)
     return (lines_overlapping(left1, right1, left2, right2) and lines_overlapping(top1, bottom1, top2, bottom2))
+end
+
+function circles_overlapping(x1, y1, r1, x2, y2, r2)
+    local dx = x2 - x1
+    local dy = y2 - y1
+    local dist = sqrt((dx * dx) + (dy * dy))
+
+    return dist < (r1 + r2)
 end
 
 __gfx__
